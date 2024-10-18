@@ -3,7 +3,7 @@ import MoodSelector from './components/MoodSelector';
 import Player from './components/Player';
 import { Music, Frown, Meh, Smile, Heart } from 'lucide-react';
 
-const SPOTIFY_CLIENT_ID = 'YOUR_SPOTIFY_CLIENT_ID';
+const SPOTIFY_CLIENT_ID = '301d7c3a7c934ebcabf356746d93dc50';
 const SPOTIFY_REDIRECT_URI = 'http://localhost:5173/callback';
 
 function App() {
