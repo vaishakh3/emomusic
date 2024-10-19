@@ -3,7 +3,6 @@ import MoodSelector from './components/MoodSelector';
 import Player from './components/Player';
 import WebcamMoodDetector from './components/WebcamMoodDetector';
 import { Music, Camera, CameraOff } from 'lucide-react';
-import emomusic from './emomusic.png';
 
 const SPOTIFY_CLIENT_ID = '301d7c3a7c934ebcabf356746d93dc50';
 const SPOTIFY_REDIRECT_URI = 'https://emomusic-blond.vercel.app/';
@@ -43,7 +42,7 @@ function App() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-700 to-indigo-900 flex flex-col items-center justify-center text-white p-4">
-      <img src={emomusic} alt="EmoMusic Logo" className="w-48 mb-8" />
+      <img src="/emomusic.png" alt="EmoMusic Logo" style={{ width: '300px' }} />
       <h1 className="text-4xl font-bold mb-8 flex items-center">
         <Music className="mr-2" /> EmoMusic
       </h1>
