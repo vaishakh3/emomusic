@@ -5,7 +5,7 @@ import WebcamMoodDetector from './components/WebcamMoodDetector';
 import { Music, Camera, CameraOff } from 'lucide-react';
 
 const SPOTIFY_CLIENT_ID = '301d7c3a7c934ebcabf356746d93dc50';
-const SPOTIFY_REDIRECT_URI = 'http://localhost:5173/callback';
+const SPOTIFY_REDIRECT_URI = 'https://emomusic-blond.vercel.app/';
 
 function App() {
   const [token, setToken] = useState<string | null>(null);
