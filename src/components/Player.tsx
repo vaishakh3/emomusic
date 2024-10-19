@@ -100,7 +100,7 @@ const Player: React.FC<PlayerProps> = ({ token, currentMood }) => {
         },
         params: {
           seed_genres: moodToGenre[currentMood] || 'pop',
-          limit: 10
+          limit: 25
         }
       });
 
