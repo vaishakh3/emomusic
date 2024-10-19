@@ -5,7 +5,7 @@ import WebcamMoodDetector from './components/WebcamMoodDetector';
 import { Music, Camera, CameraOff } from 'lucide-react';
 
 const SPOTIFY_CLIENT_ID = '301d7c3a7c934ebcabf356746d93dc50';
-const SPOTIFY_REDIRECT_URI = 'https://emomusic-blond.vercel.app/';
+const SPOTIFY_REDIRECT_URI = 'http://localhost:5173/callback';
 
 function App() {
   const [token, setToken] = useState<string | null>(null);
@@ -45,6 +45,10 @@ function App() {
       <h1 className="text-4xl font-bold mb-8 flex items-center">
         <Music className="mr-2" /> EmoMusic
       </h1>
+      <p className="text-xl font-semibold mb-4">
+              Emotion Based Music Player for Music Therapy
+              <br />
+      </p>
       {!token ? (
         <button
           onClick={handleLogin}
@@ -78,7 +82,19 @@ function App() {
           <Player token={token} currentMood={currentMood} />
         </>
       )}
+      <footer className="mt-4 text-center">
+        <p className="text-l text-white-400">
+          <br /><br /><br />
+          Built with ❤️ by Vaishakh.
+        </p>
+      </footer>
+      <div className="mt-8">
+        <p className="text-sm text-gray-400">
+          &copy; 2024 EmoMusic. All rights reserved.
+        </p>
+      </div>
     </div>
+    
   );
 }
 
