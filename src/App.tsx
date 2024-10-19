@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import MoodSelector from './components/MoodSelector';
 import Player from './components/Player';
-import { Music, Frown, Meh, Smile, Heart } from 'lucide-react';
+import WebcamMoodDetector from './components/WebcamMoodDetector';
+import { Music, Camera, CameraOff } from 'lucide-react';
 
 const SPOTIFY_CLIENT_ID = '301d7c3a7c934ebcabf356746d93dc50';
 const SPOTIFY_REDIRECT_URI = 'http://localhost:5173/callback';
@@ -9,6 +10,7 @@ const SPOTIFY_REDIRECT_URI = 'http://localhost:5173/callback';
 function App() {
   const [token, setToken] = useState<string | null>(null);
   const [currentMood, setCurrentMood] = useState<string>('');
+  const [useWebcam, setUseWebcam] = useState<boolean>(false);
 
   useEffect(() => {
     const hash = window.location.hash
@@ -30,10 +32,18 @@ function App() {
     window.location.href = `https://accounts.spotify.com/authorize?client_id=${SPOTIFY_CLIENT_ID}&redirect_uri=${SPOTIFY_REDIRECT_URI}&scope=${encodeURIComponent(scopes)}&response_type=token&show_dialog=true`;
   };
 
+  const toggleWebcam = () => {
+    setUseWebcam(!useWebcam);
+  };
+
+  const handleMoodDetected = () => {
+    setUseWebcam(false);
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-700 to-indigo-900 flex flex-col items-center justify-center text-white">
+    <div className="min-h-screen bg-gradient-to-br from-purple-700 to-indigo-900 flex flex-col items-center justify-center text-white p-4">
       <h1 className="text-4xl font-bold mb-8 flex items-center">
-        <Music className="mr-2" /> Mood Music Player
+        <Music className="mr-2" /> Solace Music Player
       </h1>
       {!token ? (
         <button
@@ -44,7 +54,27 @@ function App() {
         </button>
       ) : (
         <>
-          <MoodSelector setCurrentMood={setCurrentMood} />
+          <div className="mb-4">
+            <button
+              onClick={toggleWebcam}
+              className={`${
+                useWebcam ? 'bg-red-500 hover:bg-red-600' : 'bg-blue-500 hover:bg-blue-600'
+              } text-white font-bold py-2 px-4 rounded flex items-center`}
+            >
+              {useWebcam ? <CameraOff className="mr-2" /> : <Camera className="mr-2" />}
+              {useWebcam ? 'Disable Webcam' : 'Enable Webcam'}
+            </button>
+          </div>
+          {useWebcam ? (
+            <WebcamMoodDetector setCurrentMood={setCurrentMood} onMoodDetected={handleMoodDetected} />
+          ) : (
+            <MoodSelector setCurrentMood={setCurrentMood} currentMood={currentMood} />
+          )}
+          {currentMood && useWebcam && (
+            <p className="text-xl font-semibold mb-4">
+              Detected Mood: {currentMood.charAt(0).toUpperCase() + currentMood.slice(1)}
+            </p>
+          )}
           <Player token={token} currentMood={currentMood} />
         </>
       )}

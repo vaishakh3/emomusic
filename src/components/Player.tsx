@@ -14,6 +14,8 @@ const Player: React.FC<PlayerProps> = ({ token, currentMood }) => {
   const [current_track, setTrack] = useState<Spotify.Track | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [deviceId, setDeviceId] = useState<string | null>(null);
+  const [queue, setQueue] = useState<string[]>([]);
+  const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
 
   useEffect(() => {
     if (!token) {
@@ -74,11 +76,11 @@ const Player: React.FC<PlayerProps> = ({ token, currentMood }) => {
 
   useEffect(() => {
     if (deviceId && currentMood) {
-      playMoodBasedTrack();
+      getMoodBasedTracks();
     }
   }, [currentMood, deviceId]);
 
-  const playMoodBasedTrack = async () => {
+  const getMoodBasedTracks = async () => {
     if (!token || !deviceId) {
       setError("No Spotify token or device ID available. Please try again.");
       return;
@@ -98,27 +100,43 @@ const Player: React.FC<PlayerProps> = ({ token, currentMood }) => {
         },
         params: {
           seed_genres: moodToGenre[currentMood] || 'pop',
-          limit: 1
+          limit: 10
         }
       });
 
-      const track = response.data.tracks[0];
+      const tracks = response.data.tracks;
 
-      if (track) {
-        await axios.put(`https://api.spotify.com/v1/me/player/play?device_id=${deviceId}`, {
-          uris: [track.uri]
-        }, {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
-        setError(null);
+      if (tracks && tracks.length > 0) {
+        setQueue(tracks.map((track: any) => track.uri));
+        setCurrentTrackIndex(0);
+        playTrack(tracks[0].uri);
       } else {
         setError("No tracks found for the current mood.");
       }
     } catch (error) {
-      console.error('Error playing mood-based track:', error);
-      setError("Error playing mood-based track. Please try again.");
+      console.error('Error getting mood-based tracks:', error);
+      setError("Error getting mood-based tracks. Please try again.");
+    }
+  };
+
+  const playTrack = async (uri: string) => {
+    if (!token || !deviceId) {
+      setError("No Spotify token or device ID available. Please try again.");
+      return;
+    }
+
+    try {
+      await axios.put(`https://api.spotify.com/v1/me/player/play?device_id=${deviceId}`, {
+        uris: [uri]
+      }, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      setError(null);
+    } catch (error) {
+      console.error('Error playing track:', error);
+      setError("Error playing track. Please try again.");
     }
   };
 
@@ -130,22 +148,8 @@ const Player: React.FC<PlayerProps> = ({ token, currentMood }) => {
     }
     
     try {
-      const currentState = await player.getCurrentState();
-      console.log('Current player state:', currentState);
-      
-      if (currentState) {
-        if (currentState.paused) {
-          await player.resume();
-          console.log('Resuming playback');
-        } else {
-          await player.pause();
-          console.log('Pausing playback');
-        }
-        setPaused(!currentState.paused);
-      } else {
-        console.log('No current state. Starting new playback.');
-        await playMoodBasedTrack();
-      }
+      // Toggling play/pause; the player_state_changed listener will update the `is_paused` state.
+      await player.togglePlay();
     } catch (error) {
       console.error('Error toggling play/pause:', error);
       setError("Error controlling playback. Please try again.");
@@ -153,30 +157,18 @@ const Player: React.FC<PlayerProps> = ({ token, currentMood }) => {
   };
 
   const handlePreviousTrack = async () => {
-    if (!player) {
-      setError("Player not initialized. Please try again.");
-      return;
-    }
-    
-    try {
-      await player.previousTrack();
-    } catch (error) {
-      console.error('Error skipping to previous track:', error);
-      setError("Error skipping to previous track. Please try again.");
+    if (currentTrackIndex > 0) {
+      const newIndex = currentTrackIndex - 1;
+      setCurrentTrackIndex(newIndex);
+      await playTrack(queue[newIndex]);
     }
   };
 
   const handleNextTrack = async () => {
-    if (!player) {
-      setError("Player not initialized. Please try again.");
-      return;
-    }
-    
-    try {
-      await player.nextTrack();
-    } catch (error) {
-      console.error('Error skipping to next track:', error);
-      setError("Error skipping to next track. Please try again.");
+    if (currentTrackIndex < queue.length - 1) {
+      const newIndex = currentTrackIndex + 1;
+      setCurrentTrackIndex(newIndex);
+      await playTrack(queue[newIndex]);
     }
   };
 
